@@ -1,0 +1,21 @@
+#name, main, version and api are required
+name: RevivalBlock
+main: milk\revivalblock\RevivalBlock
+version: "1.0"
+api: ["1.13.0", "1.13.1", "1.14.0", "2.0.0"]
+
+load: POSTWORLD
+author: 우유맛비누
+commands:
+ revi:
+  usage: false
+  description: 소생블럭화
+  permission: reviblock.command.revival
+ unrevi:
+  description: 일반블럭화
+  usage: false
+  permission: reviblock.command.unrevival
+permissions:
+ reviblock.command.*:
+  default: op
+  description: false
