@@ -19,10 +19,10 @@ use pocketmine\event\player\PlayerInteractEvent;
 class RevivalBlock extends PluginBase implements Listener{
 
     public $pos = [];
+
     public $conf = [];
     public $rand = [];
-
-    public static $revi = [];
+    public $revi = [];
 
     public function onEnable(){
         $this->saveDefaultConfig();
@@ -30,7 +30,7 @@ class RevivalBlock extends PluginBase implements Listener{
 
         $this->conf = $this->getConfig()->getAll();
         $this->rand = (new Config($this->getDataFolder() . "data.yml", Config::YAML))->getAll();
-        self::$revi = (new Config($this->getDataFolder() . "revi.dat", Config::YAML))->getAll();
+        $this->revi = (new Config($this->getDataFolder() . "revi.dat", Config::YAML))->getAll();
 
         $this->getServer()->getPluginManager()->registerEvents($this, $this);
         $this->getServer()->getLogger()->info(TextFormat::GOLD . "[RevivalBlock]Plugin has been enabled");
@@ -42,13 +42,13 @@ class RevivalBlock extends PluginBase implements Listener{
         $data->save();
 
         $revi = new Config($this->getDataFolder() . "revi.dat", Config::YAML);
-        $revi->setAll($this->rand);
+        $revi->setAll($this->revi);
         $revi->save();
         $this->getServer()->getLogger()->info(TextFormat::GOLD . "[RevivalBlock]Plugin has been disabled");
     }
 
-    public static function getRevivalBlock(Vector3 $pos){
-        return isset(self::$revi["{$pos->x}:{$pos->y}:{$pos->z}"]) ? self::$revi["{$pos->x}:{$pos->y}:{$pos->z}"] : false;
+    public function getRevivalBlock(Vector3 $pos){
+        return isset($this->revi["{$pos->x}:{$pos->y}:{$pos->z}"]) ? $this->revi["{$pos->x}:{$pos->y}:{$pos->z}"] : false;
     }
 
     public function PlayerTouchBlock(PlayerInteractEvent $ev){
@@ -127,9 +127,9 @@ class RevivalBlock extends PluginBase implements Listener{
             for($y = $startY; $y <= $endY; $y++){
                 for($z = $startZ; $z <= $endZ; $z++){
                     if($isChange && isset($this->rand[$id = $level->getBlock(new Vector3($x, $y, $z))->getId()])){
-                        self::$revi["$x:$y:$z"] = $id;
+                        $this->revi["$x:$y:$z"] = $id;
                     }else{
-                        self::$revi["$x:$y:$z"] = true;
+                        $this->revi["$x:$y:$z"] = true;
                     }
                 }
             }
@@ -140,7 +140,7 @@ class RevivalBlock extends PluginBase implements Listener{
         for($x = $startX; $x <= $endX; $x++){
             for($y = $startY; $y <= $endY; $y++){
                 for($z = $startZ; $z <= $endZ; $z++){
-                    unset(self::$revi["$x:$y:$z"]);
+                    unset($this->revi["$x:$y:$z"]);
                 }
             }
         }
