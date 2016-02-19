@@ -51,15 +51,19 @@ class RevivalBlock extends PluginBase implements Listener{
         return isset($this->revi["{$pos->x}:{$pos->y}:{$pos->z}"]) ? $this->revi["{$pos->x}:{$pos->y}:{$pos->z}"] : false;
     }
 
+    public function isTool(Item $item){
+        return $item->getId() == $this->conf["tool-id"] ?? Item::STICK;
+    }
+
     public function PlayerTouchBlock(PlayerInteractEvent $ev){
         $t = $ev->getBlock();
         $p = $ev->getPlayer();
-        if($ev->getItem()->getId() == $this->conf["tool-id"] && $p->isOp()){
+        if($this->isTool($ev->getItem()) && $p->isOp()){
             if($ev->getAction() == PlayerInteractEvent::RIGHT_CLICK_BLOCK && $ev->getFace() !== 255) {
-                $this->pos[$p->getName()]['pos2'] = [$t->x, $t->y, $t->z];
+                $this->pos[$p->getName()]["pos2"] = [$t->x, $t->y, $t->z];
                 $p->sendMessage("[RevivalBlock]Pos2지점을 선택했습니다({$t->x}, {$t->y}, {$t->z})");
             }elseif($ev->getAction() == PlayerInteractEvent::LEFT_CLICK_BLOCK){
-                $this->pos[$p->getName()]['pos1'] = [$t->x, $t->y, $t->z];
+                $this->pos[$p->getName()]["pos1"] = [$t->x, $t->y, $t->z];
                 $p->sendMessage("[RevivalBlock]Pos1지점을 선택했습니다({$t->x}, {$t->y}, {$t->z})");
             }
             $ev->setCancelled();
@@ -73,8 +77,8 @@ class RevivalBlock extends PluginBase implements Listener{
         $x = $t->x;
         $y = $t->y;
         $z = $t->z;
-        if($i->getId() == $this->conf["tool-id"] && $p->isOp()){
-            $this->pos[$p->getName()]['pos1'] = [$x, $y, $z];
+        if($this->isTool($i) && $p->isOp()){
+            $this->pos[$p->getName()]["pos1"] = [$x, $y, $z];
             $p->sendMessage("[RevivalBlock]Pos1지점을 선택했습니다($x, $y, $z)");
             $ev->setCancelled();
         }elseif(($value = self::getRevivalBlock($t)) !== false){
@@ -84,7 +88,9 @@ class RevivalBlock extends PluginBase implements Listener{
                     $ev->setCancelled();
                     return;
                 }
-                foreach($t->getDrops($i) as $d) $p->getInventory()->addItem(Item::get(...$d));
+                foreach($t->getDrops($i) as $d){
+                    $p->getInventory()->addItem(Item::get(...$d));
+                }
             }else{
                 $block = Item::fromString($value);
                 if($t->getId() === $block->getId() and $t->getDamage() === $block->getDamage()){
@@ -150,17 +156,17 @@ class RevivalBlock extends PluginBase implements Listener{
         if(!$i instanceof Player) return true;
         $pu = $i->getName();
         $output = "[RevivalBlock]";
-        if(!isset($this->pos[$pu]['pos1']) or !isset($this->pos[$pu]['pos2'])){
+        if(!isset($this->pos[$pu]["pos1"]) or !isset($this->pos[$pu]["pos2"])){
             $output .= "Please tap a block to make to revival block";
             $i->sendMessage($output);
             return true;
         }
-        $sx = min($this->pos[$pu]['pos1'][0], $this->pos[$pu]['pos2'][0]);
-        $sy = min($this->pos[$pu]['pos1'][1], $this->pos[$pu]['pos2'][1]);
-        $sz = min($this->pos[$pu]['pos1'][2], $this->pos[$pu]['pos2'][2]);
-        $ex = max($this->pos[$pu]['pos1'][0], $this->pos[$pu]['pos2'][0]);
-        $ey = max($this->pos[$pu]['pos1'][1], $this->pos[$pu]['pos2'][1]);
-        $ez = max($this->pos[$pu]['pos1'][2], $this->pos[$pu]['pos2'][2]);
+        $sx = min($this->pos[$pu]["pos1"][0], $this->pos[$pu]["pos2"][0]);
+        $sy = min($this->pos[$pu]["pos1"][1], $this->pos[$pu]["pos2"][1]);
+        $sz = min($this->pos[$pu]["pos1"][2], $this->pos[$pu]["pos2"][2]);
+        $ex = max($this->pos[$pu]["pos1"][0], $this->pos[$pu]["pos2"][0]);
+        $ey = max($this->pos[$pu]["pos1"][1], $this->pos[$pu]["pos2"][1]);
+        $ez = max($this->pos[$pu]["pos1"][2], $this->pos[$pu]["pos2"][2]);
         if($cmd->getName() == "revi"){
             $this->makeBlock($sx, $sy, $sz, $ex, $ey, $ez, isset($sub[0]), $i->getLevel());
         }else{
